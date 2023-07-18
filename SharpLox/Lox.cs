@@ -36,7 +36,8 @@
         static void RunFile(string path)
         {
             var reader = new StreamReader(path);
-            Run(reader.ReadToEnd());
+            var script = reader.ReadToEnd();
+            Run(script);
             if (hadError) Exit(65);
         }
 
