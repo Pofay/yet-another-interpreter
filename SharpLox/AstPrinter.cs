@@ -8,6 +8,10 @@ namespace SharpLox
 {
     public class AstPrinter : Expr.IExprVisitor<String>
     {
+        public string Print(Expr expr)
+        {
+            return expr.Accept(this);
+        }
         public string VisitBinaryExpr(Expr.Binary expr)
         {
             return Parenthesize(expr.Opr.Lexeme, expr.Left, expr.Right);
