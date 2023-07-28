@@ -19,7 +19,6 @@
             {
                 RunPrompt();
             }
-
             // Checkpoint code for Chapter 5 Crafting Interpreters
             // var expression = new Expr.Binary(
             //     new Expr.Unary(
@@ -29,7 +28,7 @@
             //         new Expr.Grouping(
             //             new Expr.Literal(45.67)));
 
-            // Console.WriteLine(new AstPrinter().Print(expression));
+            // Console.WriteLine(new AstPrinter().Print(expression));k
         }
 
         static void RunPrompt()
@@ -56,16 +55,33 @@
         {
             var scanner = new Scanner(source);
             var tokens = scanner.ScanTokens();
+            var parser = new Parser(tokens);
+            var expression = parser.Parse();
 
-            foreach (var token in tokens)
-            {
-                Console.WriteLine(token);
-            }
+            if(hadError) return;
+
+            // foreach (var token in tokens)
+            // {
+            //     Console.WriteLine(token);
+            // }
+            Console.WriteLine(new AstPrinter().Print(expression));
         }
 
         public static void Error(int line, string message)
         {
             Report(line, "", message);
+        }
+
+        public static void Error(Token token, String message)
+        {
+            if(token.Type == TokenType.EOF)
+            {
+                Report(token.Line, " at end", message);
+            }
+            else
+            {
+                Report(token.Line, " at '" + token.Lexeme + "'", message);
+            }
         }
 
         static void Report(int line, string where, string message)
