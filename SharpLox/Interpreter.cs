@@ -36,7 +36,7 @@ namespace SharpLox
                     CheckNumberOperands(expr.Opr, left, right);
                     return (double)left <= (double)right;
                 case MINUS:
-                    CheckNumberOperand(expr.Opr, right);
+                    CheckNumberOperands(expr.Opr, left, right);
                     return (double)left - (double)right;
                 case PLUS:
                     if (left is double d1 && right is double d2)
@@ -57,6 +57,35 @@ namespace SharpLox
             }
             // Unreachable
             return null;
+        }
+
+        public void Interpret(Expr expression)
+        {
+            try
+            {
+                var value = Evaluate(expression);
+                Console.Out.WriteLine(Stringify(value));
+            }
+            catch (RuntimeError error)
+            {
+                Lox.RuntimeError(error);
+            }
+
+        }
+
+        private string Stringify(object obj)
+        {
+            if (obj == null) return "nil";
+            if (obj is double)
+            {
+                var text = obj.ToString();
+                if (text.EndsWith(".0"))
+                {
+                    text = text.Substring(0, text.Length - 2);
+                }
+                return text;
+            }
+            return obj.ToString();
         }
 
         private void CheckNumberOperands(Token opr, Object left, Object right)
@@ -102,6 +131,7 @@ namespace SharpLox
                 case BANG:
                     return !IsTruthy(right);
                 case MINUS:
+                    CheckNumberOperand(expr.Opr, right);
                     return -(double)right;
             }
             // Unreachable

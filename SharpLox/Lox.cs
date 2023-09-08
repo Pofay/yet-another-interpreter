@@ -2,7 +2,9 @@
 {
     class Lox
     {
-        public static bool hadError = false;
+        private static readonly Interpreter interpreter = new Interpreter();
+        private static bool hadError = false;
+        private static bool hadRuntimeError = false;
 
         static void Main(string[] args)
         {
@@ -49,6 +51,7 @@
             var script = reader.ReadToEnd();
             Run(script);
             if (hadError) Exit(65);
+            if (hadRuntimeError) Exit(70);
         }
 
         static void Run(string source)
@@ -58,13 +61,14 @@
             var parser = new Parser(tokens);
             var expression = parser.Parse();
 
-            if(hadError) return;
+            if (hadError) return;
 
+            interpreter.Interpret(expression);
             // foreach (var token in tokens)
             // {
             //     Console.WriteLine(token);
             // }
-            Console.WriteLine(new AstPrinter().Print(expression));
+            // Console.WriteLine(new AstPrinter().Print(expression));
         }
 
         public static void Error(int line, string message)
@@ -74,7 +78,7 @@
 
         public static void Error(Token token, String message)
         {
-            if(token.Type == TokenType.EOF)
+            if (token.Type == TokenType.EOF)
             {
                 Report(token.Line, " at end", message);
             }
@@ -93,6 +97,12 @@
         static void Exit(int code)
         {
             Environment.Exit(code);
+        }
+
+        internal static void RuntimeError(RuntimeError error)
+        {
+            Console.WriteLine(error.Message, $"\n[line {error.Token.Line}]");
+            hadRuntimeError = true;
         }
     }
 }
