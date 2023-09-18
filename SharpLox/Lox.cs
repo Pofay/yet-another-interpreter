@@ -96,7 +96,7 @@
 
         static void Exit(int code)
         {
-            Environment.Exit(code);
+            System.Environment.Exit(code);
         }
 
         internal static void RuntimeError(RuntimeError error)
