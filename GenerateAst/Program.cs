@@ -3,11 +3,16 @@
     private static void Main(string[] args)
     {
         var outputPath = @"\";
-        DefineAst(outputPath, "Expr", new[] {
-            "Binary   : Expr left, Token opr, Expr right",
-            "Grouping : Expr expression",
-            "Literal  : Object value",
-            "Unary    : Token opr, Expr right"
+        // DefineAst(outputPath, "Expr", new[] {
+        //     "Binary   : Expr left, Token opr, Expr right",
+            // "Grouping : Expr expression",
+        //     "Literal  : Object value",
+        //     "Unary    : Token opr, Expr right"
+        // });
+        DefineAst(outputPath, "Stmt", new [] {
+            "Expression : Expr xpression",
+            "Print      : Expr xpression",
+            
         });
     }
 

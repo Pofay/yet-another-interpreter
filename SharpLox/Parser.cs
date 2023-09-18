@@ -16,13 +16,32 @@ namespace SharpLox
             this.tokens = tokens;
         }
 
-        public Expr Parse()
+        public List<Stmt> Parse()
         {
-            try{
-                return Expression();
-            } catch(ParseError error) {
-                return null;
+            var statements = new List<Stmt>();
+            while(!IsAtEnd())
+            {
+                statements.Add(Statement());
             }
+            return statements;
+        }
+
+        private Stmt Statement()
+        {
+            if(Match(PRINT)) return PrintStatement();
+            return ExpressionStatement();
+        }
+
+        private Stmt ExpressionStatement()
+        {
+            var value = Expression();
+            Consume(SEMICOLON, "Expect ';' after value.");
+            return new Stmt.Print(value);
+        }
+
+        private Stmt PrintStatement()
+        {
+            throw new NotImplementedException();
         }
 
         private Expr Expression()

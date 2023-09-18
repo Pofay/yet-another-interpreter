@@ -59,11 +59,11 @@
             var scanner = new Scanner(source);
             var tokens = scanner.ScanTokens();
             var parser = new Parser(tokens);
-            var expression = parser.Parse();
+            var statements = parser.Parse();
 
             if (hadError) return;
 
-            interpreter.Interpret(expression);
+            interpreter.Interpret(statements);
             // foreach (var token in tokens)
             // {
             //     Console.WriteLine(token);

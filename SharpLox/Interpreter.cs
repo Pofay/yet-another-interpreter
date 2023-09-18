@@ -10,7 +10,7 @@ using static SharpLox.TokenType;
 
 namespace SharpLox
 {
-    public class Interpreter : Expr.IExprVisitor<object>
+    public class Interpreter : Expr.IExprVisitor<object>, Stmt.IStmtVisitor<Unit>
     {
         public object VisitBinaryExpr(Expr.Binary expr)
         {
@@ -59,18 +59,25 @@ namespace SharpLox
             return null;
         }
 
-        public void Interpret(Expr expression)
+        public void Interpret(List<Stmt> statements)
         {
             try
             {
-                var value = Evaluate(expression);
-                Console.Out.WriteLine(Stringify(value));
+                foreach (var statement in statements)
+                {
+                    Execute(statement);
+                }
             }
             catch (RuntimeError error)
             {
                 Lox.RuntimeError(error);
             }
 
+        }
+
+        private void Execute(Stmt stmt)
+        {
+            stmt.Accept(this);
         }
 
         private string Stringify(object obj)
@@ -143,6 +150,19 @@ namespace SharpLox
             if (obj == null) return false;
             if (obj is bool b) return (bool)obj;
             return true;
+        }
+
+        Unit Stmt.IStmtVisitor<Unit>.VisitExpressionStmt(Stmt.Expression stmt)
+        {
+            Evaluate(stmt.Xpression);
+            return Unit.Void;
+        }
+
+        Unit Stmt.IStmtVisitor<Unit>.VisitPrintStmt(Stmt.Print stmt)
+        {
+            var value = Evaluate(stmt.Xpression);
+            Console.WriteLine(Stringify(value));
+            return Unit.Void;
         }
     }
 
