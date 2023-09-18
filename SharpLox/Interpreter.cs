@@ -164,6 +164,16 @@ namespace SharpLox
             Console.WriteLine(Stringify(value));
             return Unit.Void;
         }
+
+        public object VisitVarExpr(Expr.Variable expr)
+        {
+            throw new NotImplementedException();
+        }
+
+        Unit Stmt.IStmtVisitor<Unit>.VisitVarStmt(Stmt.Var stmt)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }
