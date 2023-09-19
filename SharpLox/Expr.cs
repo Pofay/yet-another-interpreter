@@ -8,14 +8,31 @@ namespace SharpLox
 
       public interface IExprVisitor<T>
       {
+         T VisitAssignExpr(Assign expr);
          T VisitBinaryExpr(Binary expr);
          T VisitGroupingExpr(Grouping expr);
          T VisitLiteralExpr(Literal expr);
          T VisitUnaryExpr(Unary expr);
-         T VisitVarExpr(Variable expr);
+         T VisitVariableExpr(Variable expr);
       }
 
       public abstract T Accept<T>(IExprVisitor<T> visitor);
+
+      public class Assign : Expr
+      {
+         public Token Name { get; }
+         public Expr Value { get; }
+         public Assign(Token name, Expr value)
+         {
+            this.Name = name;
+            this.Value = value;
+         }
+
+         public override T Accept<T>(IExprVisitor<T> visitor)
+         {
+            return visitor.VisitAssignExpr(this);
+         }
+      }
 
       public class Binary : Expr
       {
@@ -89,7 +106,7 @@ namespace SharpLox
 
          public override T Accept<T>(IExprVisitor<T> visitor)
          {
-            return visitor.VisitVarExpr(this);
+            return visitor.VisitVariableExpr(this);
          }
       }
    }

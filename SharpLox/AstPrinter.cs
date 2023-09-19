@@ -12,6 +12,12 @@ namespace SharpLox
         {
             return expr.Accept(this);
         }
+
+        public string VisitAssignExpr(Expr.Assign expr)
+        {
+            throw new NotImplementedException();
+        }
+
         public string VisitBinaryExpr(Expr.Binary expr)
         {
             return Parenthesize(expr.Opr.Lexeme, expr.Left, expr.Right);
@@ -31,6 +37,16 @@ namespace SharpLox
         public string VisitUnaryExpr(Expr.Unary expr)
         {
             return Parenthesize(expr.Opr.Lexeme, expr.Right);
+        }
+
+        public string VisitVarExpr(Expr.Variable expr)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitVariableExpr(Expr.Variable expr)
+        {
+            throw new NotImplementedException();
         }
 
         private string Parenthesize(string name, params Expr[] exprs)

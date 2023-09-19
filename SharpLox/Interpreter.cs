@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -12,6 +11,8 @@ namespace SharpLox
 {
     public class Interpreter : Expr.IExprVisitor<object>, Stmt.IStmtVisitor<Unit>
     {
+        private Environment environment = new Environment();
+
         public object VisitBinaryExpr(Expr.Binary expr)
         {
             var left = Evaluate(expr.Left);
@@ -167,12 +168,53 @@ namespace SharpLox
 
         public object VisitVarExpr(Expr.Variable expr)
         {
-            throw new NotImplementedException();
+            return environment.Get(expr.Name);
         }
 
         Unit Stmt.IStmtVisitor<Unit>.VisitVarStmt(Stmt.Var stmt)
         {
+            object value = null;
+            if (stmt.Initializer != null)
+            {
+                value = Evaluate(stmt.Initializer);
+            }
+            environment.Define(stmt.Name.Lexeme, value);
+            return Unit.Void;
+        }
+
+        public object VisitAssignExpr(Expr.Assign expr)
+        {
+            var value = Evaluate(expr.Value);
+            environment.Assign(expr.Name, value);
+            return value;
+        }
+
+        public object VisitVariableExpr(Expr.Variable expr)
+        {
             throw new NotImplementedException();
+        }
+
+        Unit Stmt.IStmtVisitor<Unit>.VisitBlockStmt(Stmt.Block stmt)
+        {
+            ExecuteBlock(stmt.Statements, new Environment(environment));
+            return Unit.Void;
+        }
+
+        private void ExecuteBlock(List<Stmt> statements, Environment environment)
+        {
+            var previous = this.environment;
+            try
+            {
+                this.environment = environment;
+                foreach (var stmt in statements)
+                {
+                    Execute(stmt);
+                }
+            }
+            finally
+            {
+                this.environment = previous;
+            }
         }
     }
 

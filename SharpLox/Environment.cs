@@ -9,19 +9,50 @@ namespace SharpLox
 {
     public class Environment
     {
+        private Environment enclosing;
         private readonly Dictionary<string, object> values = new();
 
-        void Define(String name, Object value)
+        public Environment() 
+        {
+            enclosing = null;
+        }
+
+        public Environment(Environment enclosing)
+        {
+            this.enclosing = enclosing;
+        }
+
+        public void Define(String name, Object value)
         {
             values[name] = value;
         }
 
-        object Get(Token name)
+        public object Get(Token name)
         {
-            if(values.ContainsKey(name.Lexeme))
+            if (values.ContainsKey(name.Lexeme))
             {
                 return values[name.Lexeme];
             }
+
+            if(enclosing != null) return enclosing.Get(name);
+
+            throw new RuntimeError(name, "Undefined variable '" + name.Lexeme + "'.");
+        }
+
+        public void Assign(Token name, object value)
+        {
+            if (values.ContainsKey(name.Lexeme))
+            {
+                values[name.Lexeme] = value;
+                return;
+            }
+
+            if(enclosing != null)
+            {
+                enclosing.Assign(name, value);
+                return;
+            }
+
             throw new RuntimeError(name, "Undefined variable '" + name.Lexeme + "'.");
         }
     }

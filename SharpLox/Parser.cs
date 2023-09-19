@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using static SharpLox.TokenType;
 
@@ -57,7 +58,21 @@ namespace SharpLox
         private Stmt Statement()
         {
             if (Match(PRINT)) return PrintStatement();
+            if(Match(LEFT_BRACE)) return new Stmt.Block(Block());
             return ExpressionStatement();
+        }
+
+        private List<Stmt> Block()
+        {
+            List<Stmt> statements = new();
+
+            while(!Check(RIGHT_BRACE) && !IsAtEnd())
+            {
+                statements.Add(Declaration());
+            }
+
+            Consume(RIGHT_BRACE, "Expect '}' after block.");
+            return statements;
         }
 
         private Stmt ExpressionStatement()
@@ -74,7 +89,28 @@ namespace SharpLox
 
         private Expr Expression()
         {
-            return Equality();
+            return Assignment();
+        }
+
+        private Expr Assignment()
+        {
+            var expr = Equality();
+
+            if(Match((EQUAL)))
+            {
+                var equals = Previous();
+                Expr value = Assignment();
+
+                if(expr is Expr.Variable)
+                {
+                    var name = ((Expr.Variable)expr).Name;
+                    return new Expr.Assign(name, value);
+                }
+
+                Error(equals, "Invalid assignment target.");
+            }
+
+            return expr;
         }
 
         private Expr Equality()

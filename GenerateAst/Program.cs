@@ -4,6 +4,7 @@
     {
         var outputPath = @"\";
         DefineAst(outputPath, "Expr", new[] {
+            "Assign   : Token name, Expr value",
             "Binary   : Expr left, Token opr, Expr right",
             "Grouping : Expr expression",
             "Literal  : Object value",
@@ -11,6 +12,7 @@
             "Variable : Token name"
         });
         DefineAst(outputPath, "Stmt", new [] {
+            "Block      : List<Stmt> statements",
             "Expression : Expr xpression",
             "Print      : Expr xpression",
             "Var        : Token name, Expr initializer"
