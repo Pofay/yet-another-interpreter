@@ -8,12 +8,14 @@
             "Binary   : Expr left, Token opr, Expr right",
             "Grouping : Expr expression",
             "Literal  : Object value",
+            "Logical  : Expr left, Token opr, Expr right",
             "Unary    : Token opr, Expr right",
             "Variable : Token name"
         });
-        DefineAst(outputPath, "Stmt", new [] {
+        DefineAst(outputPath, "Stmt", new[] {
             "Block      : List<Stmt> statements",
             "Expression : Expr xpression",
+            "If         : Expr condition, Stmt thenBranch, Stmt elseBranch",
             "Print      : Expr xpression",
             "Var        : Token name, Expr initializer"
         });

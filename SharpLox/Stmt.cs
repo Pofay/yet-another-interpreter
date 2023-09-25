@@ -10,6 +10,7 @@ namespace SharpLox
       {
          T VisitBlockStmt(Block stmt);
          T VisitExpressionStmt(Expression stmt);
+         T VisitIfStmt(If stmt);
          T VisitPrintStmt(Print stmt);
          T VisitVarStmt(Var stmt);
       }
@@ -41,6 +42,24 @@ namespace SharpLox
          public override T Accept<T>(IStmtVisitor<T> visitor)
          {
             return visitor.VisitExpressionStmt(this);
+         }
+      }
+
+      public class If : Stmt
+      {
+         public Expr Condition { get; }
+         public Stmt ThenBranch { get; }
+         public Stmt ElseBranch { get; }
+         public If(Expr condition, Stmt thenBranch, Stmt elseBranch)
+         {
+            this.Condition = condition;
+            this.ThenBranch = thenBranch;
+            this.ElseBranch = elseBranch;
+         }
+
+         public override T Accept<T>(IStmtVisitor<T> visitor)
+         {
+            return visitor.VisitIfStmt(this);
          }
       }
 

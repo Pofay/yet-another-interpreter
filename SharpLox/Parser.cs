@@ -46,7 +46,7 @@ namespace SharpLox
             var name = Consume(IDENTIFIER, "Expect variable name.");
 
             Expr initializer = null;
-            if(Match(EQUAL))
+            if (Match(EQUAL))
             {
                 initializer = Expression();
             }
@@ -57,16 +57,33 @@ namespace SharpLox
 
         private Stmt Statement()
         {
+            if (Match(IF)) return ifStatement();
             if (Match(PRINT)) return PrintStatement();
-            if(Match(LEFT_BRACE)) return new Stmt.Block(Block());
+            if (Match(LEFT_BRACE)) return new Stmt.Block(Block());
             return ExpressionStatement();
+        }
+
+        private Stmt ifStatement()
+        {
+            Consume(LEFT_PAREN, "Expect '(' after 'if'.");
+            var condition = Expression();
+            Consume(RIGHT_PAREN, "Expect ')' after if condition.");
+
+            var thenBranch = Statement();
+            Stmt elseBranch = null;
+            if (Match(ELSE))
+            {
+                elseBranch = Statement();
+            }
+
+            return new Stmt.If(condition, thenBranch, elseBranch);
         }
 
         private List<Stmt> Block()
         {
             List<Stmt> statements = new();
 
-            while(!Check(RIGHT_BRACE) && !IsAtEnd())
+            while (!Check(RIGHT_BRACE) && !IsAtEnd())
             {
                 statements.Add(Declaration());
             }
@@ -94,20 +111,47 @@ namespace SharpLox
 
         private Expr Assignment()
         {
-            var expr = Equality();
+            var expr = Or();
 
-            if(Match((EQUAL)))
+            if (Match(EQUAL))
             {
                 var equals = Previous();
                 Expr value = Assignment();
 
-                if(expr is Expr.Variable)
+                if (expr is Expr.Variable)
                 {
                     var name = ((Expr.Variable)expr).Name;
                     return new Expr.Assign(name, value);
                 }
 
                 Error(equals, "Invalid assignment target.");
+            }
+
+            return expr;
+        }
+
+        private Expr Or()
+        {
+            var expr = And();
+            while (Match(OR))
+            {
+                var opr = Previous();
+                var right = And();
+                expr = new Expr.Logical(expr, opr, right);
+            }
+
+            return expr;
+        }
+
+        private Expr And()
+        {
+            var expr = Equality();
+
+            while (Match(AND))
+            {
+                var opr = Previous();
+                var right = Equality();
+                expr = new Expr.Logical(expr, opr, right);
             }
 
             return expr;
@@ -239,7 +283,7 @@ namespace SharpLox
                 return new Expr.Literal(Previous().Literal);
             }
 
-            if(Match(IDENTIFIER))
+            if (Match(IDENTIFIER))
             {
                 return new Expr.Variable(Previous());
             }

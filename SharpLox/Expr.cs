@@ -12,6 +12,7 @@ namespace SharpLox
          T VisitBinaryExpr(Binary expr);
          T VisitGroupingExpr(Grouping expr);
          T VisitLiteralExpr(Literal expr);
+         T VisitLogicalExpr(Logical expr);
          T VisitUnaryExpr(Unary expr);
          T VisitVariableExpr(Variable expr);
       }
@@ -77,6 +78,24 @@ namespace SharpLox
          public override T Accept<T>(IExprVisitor<T> visitor)
          {
             return visitor.VisitLiteralExpr(this);
+         }
+      }
+
+      public class Logical : Expr
+      {
+         public Expr Left { get; }
+         public Token Opr { get; }
+         public Expr Right { get; }
+         public Logical(Expr left, Token opr, Expr right)
+         {
+            this.Left = left;
+            this.Opr = opr;
+            this.Right = right;
+         }
+
+         public override T Accept<T>(IExprVisitor<T> visitor)
+         {
+            return visitor.VisitLogicalExpr(this);
          }
       }
 
