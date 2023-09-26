@@ -191,7 +191,7 @@ namespace SharpLox
 
         public object VisitVariableExpr(Expr.Variable expr)
         {
-            throw new NotImplementedException();
+            return environment.Get(expr.Name);
         }
 
         Unit Stmt.IStmtVisitor<Unit>.VisitBlockStmt(Stmt.Block stmt)
@@ -227,7 +227,7 @@ namespace SharpLox
             {
                 Execute(stmt.ElseBranch);
             }
-            return null;
+            return Unit.Void;
         }
 
         public object VisitLogicalExpr(Expr.Logical expr)
@@ -244,6 +244,16 @@ namespace SharpLox
             }
 
             return Evaluate(expr.Right);
+        }
+
+        Unit Stmt.IStmtVisitor<Unit>.VisitWhileStmt(Stmt.While stmt)
+        {
+            while (IsTruthy(Evaluate(stmt.Condition)))
+            {
+                Execute(stmt.Body);
+            }
+
+            return Unit.Void;
         }
     }
 

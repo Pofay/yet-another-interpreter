@@ -13,6 +13,7 @@ namespace SharpLox
          T VisitIfStmt(If stmt);
          T VisitPrintStmt(Print stmt);
          T VisitVarStmt(Var stmt);
+         T VisitWhileStmt(While stmt);
       }
 
       public abstract T Accept<T>(IStmtVisitor<T> visitor);
@@ -90,6 +91,22 @@ namespace SharpLox
          public override T Accept<T>(IStmtVisitor<T> visitor)
          {
             return visitor.VisitVarStmt(this);
+         }
+      }
+
+      public class While : Stmt
+      {
+         public Expr Condition { get; }
+         public Stmt Body { get; }
+         public While(Expr condition, Stmt body)
+         {
+            this.Condition = condition;
+            this.Body = body;
+         }
+
+         public override T Accept<T>(IStmtVisitor<T> visitor)
+         {
+            return visitor.VisitWhileStmt(this);
          }
       }
    }

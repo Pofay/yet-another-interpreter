@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.Serialization.Formatters;
 using System.Threading.Tasks;
 using static SharpLox.TokenType;
 
@@ -57,13 +58,78 @@ namespace SharpLox
 
         private Stmt Statement()
         {
-            if (Match(IF)) return ifStatement();
+            if (Match(FOR)) return ForStatement();
+            if (Match(IF)) return IfStatement();
             if (Match(PRINT)) return PrintStatement();
+            if (Match(WHILE)) return WhileStatement();
             if (Match(LEFT_BRACE)) return new Stmt.Block(Block());
             return ExpressionStatement();
         }
 
-        private Stmt ifStatement()
+        private Stmt ForStatement()
+        {
+            Consume(LEFT_PAREN, "Expect '(' after 'for'.");
+
+            Stmt initializer;
+            if (Match(SEMICOLON))
+            {
+                initializer = null;
+            }
+            else if (Match(VAR))
+            {
+                initializer = VarDeclaration();
+            }
+            else
+            {
+                initializer = ExpressionStatement();
+            }
+
+            Expr condition = null;
+            if (!Check(SEMICOLON))
+            {
+                condition = Expression();
+            }
+            Consume(SEMICOLON, "Expect ';' after condition.");
+
+            Expr increment = null;
+            if (!Check(RIGHT_PAREN))
+            {
+                increment = Expression();
+            }
+
+            Consume(RIGHT_PAREN, "Expect ')' after for clauses.");
+            var body = Statement();
+
+            if (increment != null)
+            {
+                body = new Stmt.Block(new List<Stmt>(new[] { body, new Stmt.Expression(increment) }));
+            }
+
+            if (condition == null)
+            {
+                condition = new Expr.Literal(true);
+            }
+            body = new Stmt.While(condition, body);
+
+            if (initializer != null)
+            {
+                body = new Stmt.Block(new List<Stmt>(new[] { initializer, body }));
+            }
+
+            return body;
+        }
+
+        private Stmt WhileStatement()
+        {
+            Consume(LEFT_PAREN, "Expect '(' after 'while'.");
+            var condition = Expression();
+            Consume(RIGHT_PAREN, "Expect ')' after condition.");
+            var body = Statement();
+
+            return new Stmt.While(condition, body);
+        }
+
+        private Stmt IfStatement()
         {
             Consume(LEFT_PAREN, "Expect '(' after 'if'.");
             var condition = Expression();
@@ -101,7 +167,9 @@ namespace SharpLox
 
         private Stmt PrintStatement()
         {
-            throw new NotImplementedException();
+            var value = Expression();
+            Consume(SEMICOLON, "Expect ';' after value.");
+            return new Stmt.Print(value);
         }
 
         private Expr Expression()
