@@ -6,6 +6,7 @@
         DefineAst(outputPath, "Expr", new[] {
             "Assign   : Token name, Expr value",
             "Binary   : Expr left, Token opr, Expr right",
+            "Call     : Expr callee, Token paren, List<Expr> arguments",
             "Grouping : Expr expression",
             "Literal  : Object value",
             "Logical  : Expr left, Token opr, Expr right",
@@ -15,9 +16,11 @@
         DefineAst(outputPath, "Stmt", new[] {
             "Block      : List<Stmt> statements",
             "Expression : Expr xpression",
+            "Function   : Token name, List<Token> parameters, List<Stmt> body",
             "If         : Expr condition, Stmt thenBranch, Stmt elseBranch",
             "Print      : Expr xpression",
             "Var        : Token name, Expr initializer",
+            "Return     : Token keyword, Expr value",
             "While      : Expr condition, Stmt body"
         });
     }

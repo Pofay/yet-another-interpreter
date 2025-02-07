@@ -1,7 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.WebSockets;
 using System.Numerics;
 using System.Reflection.Emit;
+using System.Reflection.Metadata.Ecma335;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
@@ -11,7 +15,13 @@ namespace SharpLox
 {
     public class Interpreter : Expr.IExprVisitor<object>, Stmt.IStmtVisitor<Unit>
     {
-        private Environment environment = new Environment();
+        public static readonly Environment globals = new Environment();
+        private Environment environment = globals;
+
+        public Interpreter()
+        {
+            globals.Define("clock", new Clock());
+        }
 
         public object VisitBinaryExpr(Expr.Binary expr)
         {
@@ -114,6 +124,30 @@ namespace SharpLox
             if (left == null) return false;
 
             return left.Equals(right);
+        }
+
+        public object VisitCallExpr(Expr.Call expr)
+        {
+            var callee = Evaluate(expr.Callee);
+
+            var arguments = new List<object>();
+            foreach (var argument in expr.Arguments)
+            {
+                arguments.Add(Evaluate(argument));
+            }
+
+            if(!(callee is ILoxCallable))
+            {
+                throw new RuntimeError(expr.Paren, "Can only call functions and classes.");
+            }
+
+            var function = callee as ILoxCallable;
+            if(arguments.Count != function.Arity())
+            {
+                throw new RuntimeError(expr.Paren, $"Expected {function.Arity()} arguments but got {arguments.Count}.");
+            }
+
+            return function.Call(this, arguments);
         }
 
         public object VisitGroupingExpr(Expr.Grouping expr)
@@ -255,6 +289,20 @@ namespace SharpLox
 
             return Unit.Void;
         }
-    }
 
+        Unit Stmt.IStmtVisitor<Unit>.VisitFunctionStmt(Stmt.Function stmt)
+        {
+            var function = new LoxFunction(stmt);
+            environment.Define(stmt.Name.Lexeme, function);
+            return Unit.Void;
+        }
+
+        Unit Stmt.IStmtVisitor<Unit>.VisitReturnStmt(Stmt.Return stmt)
+        {
+            object value = null;
+            if (stmt.Value != null) value = Evaluate(stmt.Value);
+
+            throw new Return(value);
+        }
+    }
 }
